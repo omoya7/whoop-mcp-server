@@ -341,7 +341,27 @@ async function main(): Promise<void> {
 		process.stderr.write('Whoop MCP server running on stdio\n');
 	} else {
 		const app = express();
-		app.use(express.json());
+		app.use(express.json());// OAuth discovery endpoints for Claude MCP compatibility
+app.get('/.well-known/oauth-protected-resource', (_req: Request, res: Response) => {
+  res.json({
+    resource: `https://${process.env.RAILWAY_PUBLIC_DOMAIN || 'localhost'}`,
+    authorization_servers: [`https://${process.env.RAILWAY_PUBLIC_DOMAIN || 'localhost'}`]
+  });
+});
+
+app.get('/.well-known/oauth-authorization-server', (_req: Request, res: Response) => {
+  res.json({
+    issuer: `https://${process.env.RAILWAY_PUBLIC_DOMAIN || 'localhost'}`,
+    authorization_endpoint: config.redirectUri.replace('/callback', '/authorize'),
+    token_endpoint: `https://${process.env.RAILWAY_PUBLIC_DOMAIN || 'localhost'}/token`,
+    response_types_supported: ['code'],
+    grant_types_supported: ['authorization_code']
+  });
+});
+
+app.post('/register', (_req: Request, res: Response) => {
+  res.status(200).json({ client_id: config.clientId });
+});
 
 		app.get('/callback', async (req: Request, res: Response) => {
 			const code = req.query.code as string | undefined;
