@@ -363,7 +363,7 @@ app.post('/register', (_req: Request, res: Response) => {
   res.status(200).json({ client_id: config.clientId });
 });
 		app.get('/authorize', (_req: Request, res: Response) => {
-  const authUrl = client.getAuthorizationUrl([config.redirectUri]);
+  const authUrl = client.getAuthorizationUrl(['read:recovery', 'read:sleep', 'read:workout', 'read:cycles', 'read:profile', 'read:body_measurement', 'offline']);
   res.redirect(authUrl);
 });
 
